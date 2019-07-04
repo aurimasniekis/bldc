@@ -27,6 +27,9 @@
 #define DCCAL_OFF()				palClearPad(GPIOB, 12)
 #define IS_DRV_FAULT()			(!palReadPad(GPIOC, 12))
 
+// Slow Mode
+#define IS_SLOW_MODE()          (!palReadPad(GPIOA, 13))
+
 #define LED_GREEN_ON()			palSetPad(GPIOC, 4)
 #define LED_GREEN_OFF()			palClearPad(GPIOC, 4)
 #define LED_RED_ON()			palSetPad(GPIOC, 5)

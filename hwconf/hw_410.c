@@ -45,6 +45,9 @@ void hw_init_gpio(void) {
 			PAL_MODE_OUTPUT_PUSHPULL |
 			PAL_STM32_OSPEED_HIGHEST);
 
+    // Slow Mode
+    palSetPadMode(GPIOA, 13, PAL_MODE_INPUT_PULLDOWN);
+
 	// GPIOC (ENABLE_GATE)
 	palSetPadMode(GPIOC, 10,
 			PAL_MODE_OUTPUT_PUSHPULL |

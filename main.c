@@ -72,6 +72,18 @@
  *
  */
 
+mc_configuration mainMCConf;
+
+#ifdef IS_SLOW_MODE
+struct {
+    float l_current_max;
+    float l_current_min;
+    float l_in_current_max;
+    float l_in_current_min;
+    float l_abs_current_max;
+} normalCurrentSettings;
+#endif
+
 // Private variables
 static THD_WORKING_AREA(periodic_thread_wa, 1024);
 static THD_WORKING_AREA(timer_thread_wa, 128);
@@ -103,6 +115,22 @@ static THD_FUNCTION(periodic_thread, arg) {
 		} else {
 			ledpwm_set_intensity(LED_GREEN, 0.2);
 		}
+
+#ifdef IS_SLOW_MODE
+    if (IS_SLOW_MODE()) {
+        mainMCConf.l_current_max = 60.0;
+        mainMCConf.l_current_min = -60.0;
+        mainMCConf.l_in_current_max = 60.0;
+        mainMCConf.l_in_current_min = -20.0;
+        mainMCConf.l_abs_current_max = 120.0;
+    } else {
+        mainMCConf.l_current_max = normalCurrentSettings.l_current_max;
+        mainMCConf.l_current_min = normalCurrentSettings.l_current_min;
+        mainMCConf.l_in_current_max = normalCurrentSettings.l_in_current_max;
+        mainMCConf.l_in_current_min = normalCurrentSettings.l_in_current_min;
+        mainMCConf.l_abs_current_max = normalCurrentSettings.l_abs_current_max;
+    }
+#endif
 
 		mc_fault_code fault = mc_interface_get_fault();
 		if (fault != FAULT_CODE_NONE) {
@@ -213,10 +241,17 @@ int main(void) {
 
 	ledpwm_init();
 
-	mc_configuration mcconf;
-	conf_general_read_mc_configuration(&mcconf);
+    conf_general_read_mc_configuration(&mainMCConf);
 
-	mc_interface_init(&mcconf);
+#ifdef IS_SLOW_MODE
+    normalCurrentSettings.l_current_max = mainMCConf.l_current_max;
+    normalCurrentSettings.l_current_min = mainMCConf.l_current_min;
+    normalCurrentSettings.l_in_current_max = mainMCConf.l_in_current_max;
+    normalCurrentSettings.l_in_current_min = mainMCConf.l_in_current_min;
+    normalCurrentSettings.l_abs_current_max = mainMCConf.l_abs_current_max;
+#endif
+
+	mc_interface_init(&mainMCConf);
 
 	commands_init();
 	comm_usb_init();
